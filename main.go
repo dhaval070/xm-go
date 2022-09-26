@@ -1,8 +1,12 @@
 package main
 
 import (
-	"xmgo/api/http/companies"
-	usecase "xmgo/pkg/usecase/companies"
+	"log"
+	"xmgo/api/handlers"
+	"xmgo/pkg/config"
+	"xmgo/pkg/models"
+	"xmgo/pkg/repo"
+	"xmgo/pkg/usecase/companies"
 
 	"github.com/gin-gonic/gin"
 )
@@ -10,9 +14,19 @@ import (
 func main() {
 	router := gin.Default()
 
-	uc := usecase.NewUseCase()
-	companiesHandler := companies.NewHandler(uc)
-	companiesHandler.InitRoutes(router.Group("/companies"))
+	cfg := config.LoadConfig()
+	log.Println(cfg)
+
+	repository, err := repo.NewRepo(cfg.DSN)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	repository.AutoMigrate(models.Company{})
+
+	uc := companies.NewUseCase(repository)
+	handler := handlers.NewHandler(uc)
+	handler.InitRoutes(router.Group("/companies"))
 
 	router.Run(":8080")
 }

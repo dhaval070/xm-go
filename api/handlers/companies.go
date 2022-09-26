@@ -1,4 +1,4 @@
-package companies
+package handlers
 
 import (
 	"net/http"
@@ -11,31 +11,34 @@ type Handler struct {
 	usecase companies.ICompanies
 }
 
-type CompanyGet struct {
-	ID int `uri:"id" binding:"required"`
+type CompanyGetReq struct {
+	ID uint `uri:"id" binding:"required"`
 }
 
+// NewHandler returns new Handler instance
 func NewHandler(uc companies.ICompanies) *Handler {
 	return &Handler{usecase: uc}
 }
 
+// InitRoutes binds handler functions to urls
 func (h *Handler) InitRoutes(r gin.IRouter) {
 	r.GET("/", h.GetAll)
 	r.GET("/:id", h.Get)
 }
 
+// GetAll returns all companies records
 func (h *Handler) GetAll(c *gin.Context) {
 	result := h.usecase.GetAll()
 	c.String(http.StatusOK, result)
 }
 
+// Get returns company record by ID
 func (h *Handler) Get(c *gin.Context) {
 	var err error
-	//id, err := strconv.Atoi(c.Param("id"))
 
-	var req = CompanyGet{}
+	var req = CompanyGetReq{}
 	if err = c.ShouldBindUri(&req); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
