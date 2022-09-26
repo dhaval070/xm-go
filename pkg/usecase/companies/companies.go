@@ -32,5 +32,6 @@ func (uc *usecase) GetAll() string {
 func (uc *usecase) Get(ctx context.Context, id uint) (models.Company, error) {
 	var err error
 	company, err := uc.repo.GetCompany(id)
+
 	return company, err
 }

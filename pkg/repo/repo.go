@@ -1,6 +1,9 @@
 package repo
 
 import (
+	"errors"
+	"log"
+	"xmgo/pkg/apperror"
 	"xmgo/pkg/models"
 
 	"gorm.io/driver/mysql"
@@ -40,6 +43,11 @@ func (r *Repo) GetCompany(ID uint) (models.Company, error) {
 	company := models.Company{}
 
 	err := r.dbh.First(&company, ID).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return company, apperror.ErrNotFound
+	} else {
+		log.Println(err)
+	}
 	return company, err
 }
 

@@ -1,7 +1,10 @@
 package handlers
 
 import (
+	"errors"
+	"log"
 	"net/http"
+	"xmgo/pkg/apperror"
 	"xmgo/pkg/usecase/companies"
 
 	"github.com/gin-gonic/gin"
@@ -45,7 +48,12 @@ func (h *Handler) Get(c *gin.Context) {
 	company, err := h.usecase.Get(c, req.ID)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		if errors.Is(err, apperror.ErrNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		} else {
+			log.Println(err.Error())
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
 		return
 	}
 
